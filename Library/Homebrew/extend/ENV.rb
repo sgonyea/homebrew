@@ -90,8 +90,7 @@ module HomebrewEnvExtension
     @compiler = :gcc
 
     raise "GCC could not be found" if args[:force] and not File.exist? ENV['CC'] \
-                                   or (File.symlink? ENV['CC'] \
-                                   and File.readlink(ENV['CC']) =~ /llvm/)
+                                   or (Pathname.new(ENV['CC']).realpath.to_s =~ /llvm/)
   end
   alias_method :gcc_4_2, :gcc
 
@@ -280,6 +279,7 @@ Please take one of the following actions:
     cflags =~ %r{(-Xarch_i386 )-march=}
     xarch = $1.to_s
     remove_from_cflags %r{(-Xarch_i386 )?-march=\S*}
+    remove_from_cflags %r{( -Xclang \S+)+}
     remove_from_cflags %r{-mssse3}
     remove_from_cflags %r{-msse4(\.\d)?}
     # Don't set -msse3 and older flags because -march does that for us
